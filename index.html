@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMS+ Not Finished Production Orders</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Tahoma, Arial, sans-serif;
+  font-size: 11px;
+  background: #c0c0c0;
+  color: #000;
+  padding: 16px;
+}
+
+/* ── Window ── */
+.window {
+  background: #f0f0f0;
+  border: 2px solid #5eadb5;
+  max-width: 980px;
+  margin: 0 auto;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+}
+
+/* ── Title bar ── */
+.titlebar {
+  background: #e4e4e4;
+  border-bottom: 1px solid #5eadb5;
+  padding: 3px 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  user-select: none;
+}
+.titlebar-icon { width: 14px; height: 14px; background: #5eadb5; flex-shrink: 0; }
+.titlebar-title { flex: 1; font-size: 11px; font-weight: bold; }
+.titlebar-btns { display: flex; gap: 2px; }
+.tbtn {
+  width: 16px; height: 14px;
+  background: #d4d0c8;
+  border: 1px solid #808080;
+  font-size: 9px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.tbtn:active { background: #b0b0b0; }
+
+/* ── Body layout ── */
+.win-body { padding: 8px 10px 8px; }
+.main-layout { display: grid; grid-template-columns: 1fr 140px; gap: 8px; }
+
+/* ── Form rows ── */
+.row { display: flex; align-items: flex-start; gap: 4px; margin-bottom: 5px; }
+.row-lbl { min-width: 112px; flex-shrink: 0; padding-top: 2px; font-size: 11px; }
+
+/* ── Inputs ── */
+input[type="text"], input[type="number"], input[type="time"], select, textarea {
+  font-family: Tahoma, Arial, sans-serif;
+  font-size: 11px;
+  background: #fff;
+  border: 1px solid #7f9db9;
+  padding: 1px 3px;
+  color: #000;
+  outline: none;
+}
+input:focus, select:focus, textarea:focus { border-color: #5eadb5; }
+textarea { resize: vertical; }
+input[type="checkbox"] { width: 13px; height: 13px; cursor: pointer; margin: 0; }
+
+.irow { display: flex; align-items: center; gap: 4px; flex: 1; }
+.irow select { width: 52px; }
+.irow input[type="time"] { width: 60px; }
+
+/* ── Recipients two-column layout ── */
+.recip-wrap { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.recip-col { display: flex; flex-direction: column; gap: 2px; }
+.recip-filter { display: flex; align-items: center; gap: 3px; }
+.recip-filter select { flex: 1; height: 18px; padding: 0 2px; }
+
+/* ── Tables ── */
+.tbl-scroll { border: 1px solid #7f9db9; background: #fff; overflow-y: auto; max-height: 112px; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 11px; }
+.tbl thead th {
+  background: #5eadb5; color: #fff;
+  border-right: 1px solid #3d8a92; border-bottom: 1px solid #3d8a92;
+  padding: 2px 5px; text-align: left; font-weight: bold; font-size: 11px;
+  cursor: pointer; white-space: nowrap;
+}
+.tbl thead th:last-child { border-right: none; }
+.tbl tbody td {
+  border-bottom: 1px solid #e8e8e8; border-right: 1px solid #e8e8e8;
+  padding: 1px 4px; vertical-align: middle;
+}
+.tbl tbody td:last-child { border-right: none; }
+.tbl tbody tr:nth-child(even) td { background: #f5f5f5; }
+.tbl tbody tr:hover td { background: #cde8f0; }
+.chkcol { width: 20px; text-align: center; }
+
+/* ── Tree view (production lines) ── */
+.tree-scroll { border: 1px solid #7f9db9; background: #fff; overflow-y: auto; max-height: 120px; }
+.tree { width: 100%; border-collapse: collapse; font-size: 11px; }
+.tree thead th {
+  background: #5eadb5; color: #fff;
+  border-right: 1px solid #3d8a92; border-bottom: 1px solid #3d8a92;
+  padding: 2px 5px; text-align: left; font-weight: bold;
+}
+.tree thead th:last-child { border-right: none; }
+.tree tbody td {
+  border-bottom: 1px solid #ececec;
+  padding: 1px 3px; vertical-align: middle;
+}
+.tree tbody tr:nth-child(even) td { background: #f5f5f5; }
+.tree tbody tr:hover td { background: #cde8f0; }
+.toggle {
+  width: 13px; height: 13px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid #999; background: #fff;
+  font-size: 9px; font-weight: bold; cursor: pointer;
+  user-select: none; flex-shrink: 0; line-height: 1;
+}
+.plant-icon {
+  width: 14px; height: 14px; background: #5eadb5;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 8px; color: #fff; font-weight: bold; flex-shrink: 0;
+}
+.arrow-icon { color: #1a7a50; font-size: 13px; line-height: 1; }
+.node-cell { display: flex; align-items: center; gap: 3px; }
+
+/* ── Buttons ── */
+.btn-area { display: flex; flex-direction: column; gap: 3px; padding-top: 0; }
+.btn {
+  background: #e1e1e1; border: 1px solid #adadad;
+  padding: 4px 6px; font-family: Tahoma, Arial; font-size: 11px;
+  cursor: pointer; width: 100%; text-align: center;
+  border-radius: 2px; color: #000;
+}
+.btn:hover { background: #d4edf0; border-color: #5eadb5; }
+.btn:active { background: #b8dde4; }
+.btn-primary { background: #d0eaf0; border-color: #5eadb5; font-weight: bold; }
+.btn-primary:hover { background: #b8dde4; }
+.btn-gap { height: 5px; }
+
+/* ── Active configuration ── */
+.active-box { border: 1px solid #7f9db9; margin-top: 8px; }
+.active-hdr { background: #d8e4ec; border-bottom: 1px solid #7f9db9; padding: 3px 6px; font-weight: bold; }
+.active-tbl { width: 100%; border-collapse: collapse; font-size: 11px; background: #fff; }
+.active-tbl th {
+  background: #e8eff3; border-bottom: 1px solid #b0c8d8; border-right: 1px solid #b0c8d8;
+  padding: 2px 6px; text-align: left; font-weight: bold;
+}
+.active-tbl th:last-child { border-right: none; }
+.active-tbl td { border-bottom: 1px solid #ebebeb; border-right: 1px solid #ebebeb; padding: 2px 6px; }
+.active-tbl td:last-child { border-right: none; }
+.active-tbl tbody tr:hover td { background: #cde8f0; }
+
+/* ── Report area ── */
+.report-area { display: none; margin-top: 8px; }
+.report-area.visible { display: block; }
+.report-hdr-box { border: 1px solid #7f9db9; background: #fff; padding: 4px 8px; margin-bottom: 4px; }
+.rh { display: flex; gap: 8px; margin-bottom: 2px; font-size: 11px; }
+.rh:last-child { margin-bottom: 0; }
+.rh b { min-width: 55px; }
+.email-body { border: 1px solid #7f9db9; background: #fff; padding: 4px 8px; margin-bottom: 4px; font-size: 11px; white-space: pre-wrap; line-height: 1.5; }
+.report-scroll { border: 1px solid #7f9db9; overflow-x: auto; }
+.rtbl { width: 100%; border-collapse: collapse; min-width: 1060px; font-size: 11px; }
+.rtbl thead tr:first-child th { background: #1a4e8a; color: #fff; border: 1px solid #143d6e; padding: 3px 5px; text-align: center; font-weight: bold; }
+.rtbl thead tr:nth-child(2) th { background: #2e6db0; color: #fff; border: 1px solid #1a4e8a; padding: 2px 5px; text-align: center; font-size: 10px; font-weight: bold; }
+.rtbl tbody td { border: 1px solid #d4d4d4; padding: 1px 5px; background: #fff; white-space: nowrap; }
+.rtbl tbody tr:nth-child(even) td { background: #edf4f8; }
+.rtbl tbody tr:hover td { background: #cde8f0; }
+
+/* ── Status bar ── */
+.statusbar { background: #f0f0f0; border-top: 1px solid #5eadb5; padding: 2px 8px; font-size: 10px; color: #444; display: flex; gap: 16px; }
+
+/* ── Sep ── */
+.sep { height: 1px; background: #b0c8c8; margin: 6px 0; }
+</style>
+</head>
+<body>
+<div class="window">
+
+  <!-- Title bar -->
+  <div class="titlebar">
+    <div class="titlebar-icon"></div>
+    <div class="titlebar-title">AMS+ Not Finished Production Orders</div>
+    <div class="titlebar-btns">
+      <div class="tbtn">&#9633;</div>
+      <div class="tbtn">&#215;</div>
+    </div>
+  </div>
+
+  <div class="win-body">
+    <div class="main-layout">
+
+      <!-- ═══ LEFT FORM ═══ -->
+      <div>
+
+        <!-- Time interval -->
+        <div class="row">
+          <span class="row-lbl">Time interval</span>
+          <div class="irow">
+            Every
+            <select id="intervalType"><option>day</option><option>week</option><option>month</option></select>
+            at
+            <input type="time" id="intervalTime" value="06:00">
+          </div>
+        </div>
+
+        <!-- Configuration name -->
+        <div class="row">
+          <span class="row-lbl">Configuration name</span>
+          <input type="text" style="flex:1;" id="configName">
+        </div>
+
+        <!-- Email text -->
+        <div class="row">
+          <span class="row-lbl">Email text</span>
+          <textarea style="flex:1;" id="emailText" rows="3">Dear team,
+Please find the attached report of not completed production orders from yesterday. Review and take appropriate action.
+Best regards, AMS+ System</textarea>
+        </div>
+
+        <!-- Recipients -->
+        <div class="row" style="align-items:flex-start; margin-top:2px;">
+          <span class="row-lbl" style="padding-top:2px;">Recipients</span>
+          <div class="recip-wrap">
+
+            <!-- People -->
+            <div class="recip-col">
+              <div class="recip-filter">
+                <input type="checkbox" id="allPeople" onchange="toggleAllPeople(this.checked)" title="Select all">
+                <select id="filterPeople"><option>-- All</option></select>
+              </div>
+              <div class="tbl-scroll">
+                <table class="tbl">
+                  <thead><tr>
+                    <th class="chkcol"></th>
+                    <th>Name &#9650;</th>
+                    <th>Surname</th>
+                  </tr></thead>
+                  <tbody id="peopleTbody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Groups -->
+            <div class="recip-col">
+              <div class="recip-filter">
+                <input type="checkbox" id="allGroups" onchange="toggleAllGroups(this.checked)" title="Select all">
+                <select id="filterGroups"><option>-- All</option></select>
+              </div>
+              <div class="tbl-scroll">
+                <table class="tbl">
+                  <thead><tr>
+                    <th class="chkcol"></th>
+                    <th>User Groups &#9650;</th>
+                  </tr></thead>
+                  <tbody id="groupsTbody"></tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Report filters -->
+        <div class="row" style="align-items:flex-start; margin-top:4px;">
+          <span class="row-lbl" style="padding-top:2px;">Report filters</span>
+          <div style="flex:1;">
+
+            <!-- Age limit -->
+            <div style="display:flex; align-items:center; gap:6px; margin-bottom:5px;">
+              <span>Age limit (Days):</span>
+              <input type="number" id="ageLimit" value="0" min="0" max="365" style="width:52px;">
+              <span id="ageLimitNote" style="font-size:10px; color:#666;"></span>
+            </div>
+
+            <!-- Production lines tree — NEW -->
+            <div style="font-size:11px; margin-bottom:3px;">
+              Report filters&nbsp;<span style="color:red;font-size:10px;font-weight:bold;">[NEW]</span>
+              &nbsp;<span style="font-size:10px;color:#666;">— select production lines</span>
+            </div>
+            <div class="tree-scroll">
+              <table class="tree">
+                <thead><tr>
+                  <th style="width:16px;padding:2px 2px;"></th>
+                  <th style="width:16px;padding:2px 2px;"></th>
+                  <th style="width:16px;padding:2px 2px;"></th>
+                  <th>Production Lines</th>
+                </tr></thead>
+                <tbody id="linesTreeBody"></tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Active configuration -->
+        <div class="active-box">
+          <div class="active-hdr">Active configuration</div>
+          <table class="active-tbl">
+            <thead><tr><th>Name</th><th>Interval</th><th>Last run</th></tr></thead>
+            <tbody id="activeConfigBody">
+              <tr><td colspan="3" style="color:#888;font-style:italic;padding:3px 6px;">No active configurations</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div><!-- /left -->
+
+      <!-- ═══ RIGHT BUTTONS ═══ -->
+      <div class="btn-area">
+        <button class="btn btn-primary" onclick="generateReport()">GENERATE</button>
+        <div class="btn-gap"></div>
+        <button class="btn" onclick="saveConfig()">Save configuration</button>
+        <button class="btn" onclick="saveNewConfig()">Save new configuration</button>
+        <div class="btn-gap"></div>
+        <button class="btn" onclick="removeConfig()">Remove configuration</button>
+        <button class="btn" onclick="clearConfig()">Clear configuration</button>
+      </div>
+
+    </div><!-- /main-layout -->
+
+    <!-- ═══ REPORT ═══ -->
+    <div class="report-area" id="reportArea">
+      <div class="sep"></div>
+      <div style="font-weight:bold; margin-bottom:4px;">Generated Report - Email Preview</div>
+      <div class="report-hdr-box">
+        <div class="rh"><b>To:</b><span id="rptTo"></span></div>
+        <div class="rh"><b>Subject:</b><span id="rptSubject"></span></div>
+        <div class="rh"><b>Lines:</b><span id="rptLines"></span></div>
+        <div class="rh"><b>Records:</b><span id="rptCount"></span></div>
+      </div>
+      <div class="email-body" id="rptBody"></div>
+      <div style="font-size:10px;color:#666;margin-bottom:3px;">Sorted by Order Start Date (ascending).</div>
+      <div class="report-scroll">
+        <table class="rtbl">
+          <thead>
+            <tr>
+              <th colspan="3">Work Center</th>
+              <th colspan="3">Article</th>
+              <th colspan="4">Quantity</th>
+              <th colspan="2">Order Start</th>
+              <th colspan="2">Order End</th>
+              <th colspan="3">Other</th>
+            </tr>
+            <tr>
+              <th>Line</th><th>Work Center</th><th>Prod. Order No.</th>
+              <th>SAP Status</th><th>AMS+ Status</th><th>Article No.</th><th>Description</th>
+              <th>Target</th><th>Started</th><th>Produced</th><th>Scrapped</th>
+              <th>Date</th><th>Time</th><th>Date</th><th>Time</th>
+              <th>On Hold</th><th>Comment</th><th>Destination</th>
+            </tr>
+          </thead>
+          <tbody id="rptRows"></tbody>
+        </table>
+      </div>
+      <div style="text-align:right; margin-top:4px;">
+        <button class="btn" style="width:auto;padding:3px 16px;display:inline-block;" onclick="closeReport()">Close</button>
+      </div>
+    </div>
+
+  </div><!-- /win-body -->
+
+  <div class="statusbar">
+    <span id="statusMsg">Ready</span>
+    <span id="statusTime"></span>
+  </div>
+</div>
+
+<script>
+/* ═══ DATA ═══ */
+const GROUPS = [
+  { name:"Group A - Production", people:[{f:"Peter",l:"Novak"},{f:"Jana",l:"Horvathova"},{f:"Martin",l:"Kovac"},{f:"Eva",l:"Blahova"}] },
+  { name:"Group B - Logistics",  people:[{f:"Tomas",l:"Cierny"},{f:"Lucia",l:"Pokorna"},{f:"Michal",l:"Dvorak"},{f:"Zuzana",l:"Kralova"}] },
+  { name:"Group C - Management", people:[{f:"Ondrej",l:"Sedlak"},{f:"Anna",l:"Vlcek"},{f:"Radoslav",l:"Benes"},{f:"Katarina",l:"Mocak"}] }
+];
+
+const PLANTS = [
+  { name:"Trencin", lines:["Line 1","Line 2","Line 3","Line 4","Line 5"] }
+];
+
+const DATA = [
+  {li:1,wc:"PC0106",po:"297728511",sap:"Partially Confirmed",ams:"RUNNING",art:"0020336768",desc:"Arotherm refrigerant pipe cpl suction L",t:2880,s:2801,p:2044,sc:127,sd:"04-02-2026",st:"15:30",ed:"11-03-2026",et:"23:39",hold:"no", com:"",                  dest:"Bratislava"},
+  {li:1,wc:"PC0106",po:"297728512",sap:"Open",               ams:"RUNNING",art:"0020336769",desc:"Heat pump compressor unit 9kW",          t:1500,s:1200,p:980, sc:45, sd:"05-02-2026",st:"08:00",ed:"15-03-2026",et:"16:00",hold:"no", com:"",                  dest:"Kosice"},
+  {li:1,wc:"PC0106",po:"297728513",sap:"Partially Confirmed",ams:"RUNNING",art:"0020336770",desc:"Boiler insulation layer assembly 15L",   t:3200,s:3100,p:2750,sc:200,sd:"01-02-2026",st:"07:00",ed:"10-03-2026",et:"18:00",hold:"yes",com:"Material delayed",   dest:"Zilina"},
+  {li:1,wc:"PC0106",po:"297728514",sap:"Open",               ams:"RUNNING",art:"0020336771",desc:"Condensate pump assembly 230V",          t:760, s:600, p:480, sc:18, sd:"08-02-2026",st:"10:00",ed:"17-03-2026",et:"14:00",hold:"no", com:"",                  dest:"Presov"},
+  {li:2,wc:"PC0108",po:"297735001",sap:"Open",               ams:"RUNNING",art:"0020337100",desc:"Gas condensing boiler heat exchanger",   t:640, s:580, p:510, sc:12, sd:"06-02-2026",st:"09:00",ed:"14-03-2026",et:"17:00",hold:"no", com:"",                  dest:"Trencin"},
+  {li:2,wc:"PC0108",po:"297735002",sap:"Partially Confirmed",ams:"RUNNING",art:"0020337101",desc:"Expansion vessel membrane 12L",          t:820, s:790, p:710, sc:30, sd:"07-02-2026",st:"10:00",ed:"16-03-2026",et:"12:00",hold:"no", com:"",                  dest:"Senica"},
+  {li:2,wc:"PC0108",po:"297735003",sap:"Open",               ams:"RUNNING",art:"0020337102",desc:"Burner nozzle set LPG 24kW",             t:1100,s:950, p:820, sc:22, sd:"09-02-2026",st:"07:30",ed:"18-03-2026",et:"15:00",hold:"no", com:"",                  dest:"Nitra"},
+  {li:3,wc:"PC0110",po:"297740100",sap:"Open",               ams:"RUNNING",art:"0020338200",desc:"Heating circulation pump 80W",           t:1100,s:950, p:820, sc:15, sd:"03-02-2026",st:"06:30",ed:"09-03-2026",et:"14:30",hold:"no", com:"",                  dest:"Skalica"},
+  {li:3,wc:"PC0110",po:"297740101",sap:"Partially Confirmed",ams:"RUNNING",art:"0020338201",desc:"Domestic hot water coil assembly",       t:2400,s:2200,p:1900,sc:88, sd:"08-02-2026",st:"11:00",ed:"17-03-2026",et:"20:00",hold:"no", com:"",                  dest:"Roding"},
+  {li:3,wc:"PC0110",po:"297740102",sap:"Open",               ams:"RUNNING",art:"0020338202",desc:"Pressure relief valve 3bar",             t:560, s:500, p:450, sc:22, sd:"09-02-2026",st:"08:00",ed:"18-03-2026",et:"16:00",hold:"yes",com:"Quality check",      dest:"Belper"},
+  {li:3,wc:"PC0110",po:"297740103",sap:"Partially Confirmed",ams:"RUNNING",art:"0020338203",desc:"Buffer tank flange connector 1.5\"",     t:980, s:900, p:750, sc:40, sd:"10-02-2026",st:"09:00",ed:"19-03-2026",et:"15:00",hold:"no", com:"",                  dest:"Remscheid"},
+  {li:4,wc:"PC0112",po:"297745200",sap:"Open",               ams:"RUNNING",art:"0020339300",desc:"Flue gas outlet pipe DN80 1m",           t:3600,s:3400,p:3100,sc:55, sd:"02-02-2026",st:"07:30",ed:"08-03-2026",et:"13:30",hold:"no", com:"",                  dest:"Ostrava"},
+  {li:4,wc:"PC0112",po:"297745201",sap:"Partially Confirmed",ams:"RUNNING",art:"0020339301",desc:"Electronic ignition module 230V",        t:1800,s:1600,p:1400,sc:70, sd:"11-02-2026",st:"10:30",ed:"20-03-2026",et:"17:30",hold:"no", com:"",                  dest:"Brno"},
+  {li:4,wc:"PC0112",po:"297745202",sap:"Open",               ams:"RUNNING",art:"0020339302",desc:"Safety thermostat capillary 90C",        t:2200,s:2000,p:1750,sc:90, sd:"12-02-2026",st:"08:00",ed:"21-03-2026",et:"16:00",hold:"yes",com:"Sensor calibration", dest:"Liberec"},
+  {li:5,wc:"PC0114",po:"297750300",sap:"Open",               ams:"RUNNING",art:"0020340400",desc:"Temperature sensor NTC 10kOhm",          t:4200,s:4000,p:3700,sc:120,sd:"12-02-2026",st:"08:00",ed:"21-03-2026",et:"16:00",hold:"no", com:"",                  dest:"Plzen"},
+  {li:5,wc:"PC0114",po:"297750301",sap:"Partially Confirmed",ams:"RUNNING",art:"0020340401",desc:"Modulating gas valve 24V",               t:900, s:850, p:780, sc:35, sd:"13-02-2026",st:"09:00",ed:"22-03-2026",et:"14:00",hold:"yes",com:"Awaiting approval",  dest:"Liberec"},
+  {li:5,wc:"PC0114",po:"297750302",sap:"Open",               ams:"RUNNING",art:"0020340402",desc:"Control board PCB assembly v3.2",        t:650, s:580, p:500, sc:28, sd:"14-02-2026",st:"07:00",ed:"23-03-2026",et:"13:00",hold:"no", com:"",                  dest:"Poprad"},
+];
+
+let savedList = [];
+
+/* ═══ BUILD PEOPLE TABLE ═══ */
+function buildPeople() {
+  const tb = document.getElementById("peopleTbody");
+  GROUPS.forEach((g, gi) => {
+    g.people.forEach((p, pi) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td class="chkcol"><input type="checkbox" class="pchk" id="p_${gi}_${pi}" data-gi="${gi}"></td>
+        <td>${p.f}</td><td>${p.l}</td>`;
+      tb.appendChild(tr);
+    });
+  });
+}
+
+/* ═══ BUILD GROUPS TABLE ═══ */
+function buildGroups() {
+  const tb = document.getElementById("groupsTbody");
+  GROUPS.forEach((g, gi) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td class="chkcol"><input type="checkbox" id="grp_${gi}" onchange="toggleGroup(${gi},this.checked)"></td>
+      <td>${g.name}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+/* ═══ BUILD LINES TREE ═══ */
+function buildLines() {
+  const tb = document.getElementById("linesTreeBody");
+  PLANTS.forEach((plant, pi) => {
+    // Parent row
+    const pr = document.createElement("tr");
+    pr.innerHTML = `
+      <td style="padding:1px 2px;"><span class="toggle" id="tog_${pi}" onclick="togglePlant(${pi})">-</span></td>
+      <td style="padding:1px 2px;text-align:center;"><input type="checkbox" id="pchk_plant_${pi}" checked onchange="togglePlantLines(${pi},this.checked)"></td>
+      <td style="padding:1px 2px;"><span class="plant-icon">T</span></td>
+      <td style="padding:1px 4px;font-weight:bold;">${plant.name}</td>`;
+    tb.appendChild(pr);
+
+    // Child rows
+    plant.lines.forEach((lineName, li) => {
+      const cr = document.createElement("tr");
+      cr.className = "child_" + pi;
+      cr.innerHTML = `
+        <td style="padding:1px 2px;"></td>
+        <td style="padding:1px 2px;text-align:center;"><input type="checkbox" id="line_${li+1}" data-pi="${pi}" checked onchange="syncPlant(${pi})"></td>
+        <td style="padding:1px 2px;text-align:center;"><span class="arrow-icon">&#10148;</span></td>
+        <td style="padding:1px 4px;">${lineName}</td>`;
+      tb.appendChild(cr);
+    });
+  });
+}
+
+/* ═══ TREE HELPERS ═══ */
+function togglePlant(pi) {
+  const rows = document.querySelectorAll(".child_" + pi);
+  const tog  = document.getElementById("tog_" + pi);
+  const show = tog.textContent === "+";
+  rows.forEach(r => r.style.display = show ? "" : "none");
+  tog.textContent = show ? "-" : "+";
+}
+function togglePlantLines(pi, checked) {
+  PLANTS[pi].lines.forEach((_, li) => {
+    const el = document.getElementById("line_" + (li+1));
+    if (el) el.checked = checked;
+  });
+}
+function syncPlant(pi) {
+  const all = PLANTS[pi].lines.every((_, li) => document.getElementById("line_"+(li+1))?.checked);
+  const el  = document.getElementById("pchk_plant_" + pi);
+  if (el) el.checked = all;
+}
+
+/* ═══ RECIPIENTS HELPERS ═══ */
+function toggleGroup(gi, checked) {
+  document.querySelectorAll(`.pchk[data-gi="${gi}"]`).forEach(c => c.checked = checked);
+}
+function toggleAllPeople(checked) {
+  document.querySelectorAll(".pchk").forEach(c => c.checked = checked);
+}
+function toggleAllGroups(checked) {
+  GROUPS.forEach((_, gi) => {
+    const el = document.getElementById("grp_" + gi);
+    if (el) { el.checked = checked; toggleGroup(gi, checked); }
+  });
+}
+
+/* ═══ GETTERS ═══ */
+function getLines() {
+  return PLANTS.flatMap(plant =>
+    plant.lines.map((_, li) => document.getElementById("line_"+(li+1))?.checked ? li+1 : null).filter(Boolean)
+  );
+}
+function getRecipients() {
+  const r = [];
+  GROUPS.forEach((g, gi) => g.people.forEach((p, pi) => {
+    if (document.getElementById("p_"+gi+"_"+pi)?.checked) r.push(p.f + " " + p.l);
+  }));
+  if (!r.length) {
+    GROUPS.forEach((g, gi) => {
+      if (document.getElementById("grp_"+gi)?.checked) r.push(...g.people.map(p=>p.f+" "+p.l));
+    });
+  }
+  return r;
+}
+
+/* ═══ UTILS ═══ */
+function nowStr() {
+  const d = new Date();
+  return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear()
+    +" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+}
+function setStatus(msg) {
+  document.getElementById("statusMsg").textContent = msg;
+  document.getElementById("statusTime").textContent = nowStr();
+}
+function updateAgeNote() {
+  const days = parseInt(document.getElementById("ageLimit").value) || 0;
+  if (!days) { document.getElementById("ageLimitNote").textContent = ""; return; }
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days);
+  const f = d => String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear();
+  document.getElementById("ageLimitNote").textContent = "Show POs older than: " + f(cutoff);
+}
+
+/* ═══ GENERATE ═══ */
+function generateReport() {
+  const lines = getLines();
+  if (!lines.length) { setStatus("Select at least one production line."); return; }
+
+  const name     = document.getElementById("configName").value || "Unnamed";
+  const emailTxt = document.getElementById("emailText").value;
+  const recip    = getRecipients();
+  const recipStr = recip.length ? recip.join(", ") : GROUPS.flatMap(g=>g.people.map(p=>p.f+" "+p.l)).join(", ");
+  const lineStr  = lines.map(l => "Line "+l).join(", ");
+
+  const rows = DATA
+    .filter(r => lines.includes(r.li))
+    .sort((a,b) => new Date(a.sd.split("-").reverse().join("-")+"T"+a.st) - new Date(b.sd.split("-").reverse().join("-")+"T"+b.st));
+
+  document.getElementById("rptTo").textContent      = recipStr;
+  document.getElementById("rptSubject").textContent = "[AMS+] Not Complete Yesterday Plan - "+name+" - "+nowStr();
+  document.getElementById("rptLines").textContent   = lineStr;
+  document.getElementById("rptCount").textContent   = rows.length + " record(s)";
+  document.getElementById("rptBody").textContent    = emailTxt;
+
+  const tb = document.getElementById("rptRows");
+  tb.innerHTML = "";
+  rows.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>L${r.li}</td><td>${r.wc}</td><td>${r.po}</td>
+      <td>${r.sap}</td><td>${r.ams}</td><td>${r.art}</td>
+      <td style="white-space:normal;min-width:150px;">${r.desc}</td>
+      <td style="text-align:right;">${r.t.toLocaleString()}</td>
+      <td style="text-align:right;">${r.s.toLocaleString()}</td>
+      <td style="text-align:right;">${r.p.toLocaleString()}</td>
+      <td style="text-align:right;">${r.sc.toLocaleString()}</td>
+      <td>${r.sd}</td><td>${r.st}</td><td>${r.ed}</td><td>${r.et}</td>
+      <td>${r.hold.toUpperCase()}</td>
+      <td style="white-space:normal;">${r.com}</td>
+      <td>${r.dest}</td>`;
+    tb.appendChild(tr);
+  });
+
+  const area = document.getElementById("reportArea");
+  area.classList.add("visible");
+  setTimeout(() => area.scrollIntoView({behavior:"smooth",block:"start"}), 80);
+  setStatus("Report generated: "+rows.length+" record(s) | "+lineStr);
+}
+
+function closeReport() {
+  document.getElementById("reportArea").classList.remove("visible");
+  setStatus("Ready");
+}
+
+/* ═══ CONFIG BUTTONS ═══ */
+function refreshActive() {
+  const tb = document.getElementById("activeConfigBody");
+  tb.innerHTML = savedList.length
+    ? savedList.map(c=>`<tr><td>${c.name}</td><td>${c.interval}</td><td>${c.lastRun}</td></tr>`).join("")
+    : `<tr><td colspan="3" style="color:#888;font-style:italic;padding:3px 6px;">No active configurations</td></tr>`;
+}
+function saveConfig() {
+  const name = document.getElementById("configName").value.trim();
+  if (!name) { setStatus("Configuration name is required."); return; }
+  const entry = { name, interval:"Every "+document.getElementById("intervalType").value+" at "+document.getElementById("intervalTime").value, lastRun:nowStr() };
+  const idx = savedList.findIndex(c=>c.name===name);
+  if (idx>=0) savedList[idx]=entry; else savedList.push(entry);
+  refreshActive(); setStatus("Configuration \""+name+"\" saved.");
+}
+function saveNewConfig() {
+  const name = document.getElementById("configName").value.trim();
+  if (!name) { setStatus("Configuration name is required."); return; }
+  if (savedList.find(c=>c.name===name)) { setStatus("\""+name+"\" already exists. Use Save configuration to update."); return; }
+  savedList.push({ name, interval:"Every "+document.getElementById("intervalType").value+" at "+document.getElementById("intervalTime").value, lastRun:nowStr() });
+  refreshActive(); setStatus("New configuration \""+name+"\" saved.");
+}
+function removeConfig() {
+  const name = document.getElementById("configName").value.trim();
+  if (!name) { setStatus("Enter configuration name to remove."); return; }
+  const before = savedList.length;
+  savedList = savedList.filter(c=>c.name!==name);
+  refreshActive();
+  setStatus(savedList.length<before ? "Configuration \""+name+"\" removed." : "\""+name+"\" not found.");
+}
+function clearConfig() {
+  document.getElementById("configName").value   = "";
+  document.getElementById("emailText").value    = "";
+  document.getElementById("intervalType").value = "day";
+  document.getElementById("intervalTime").value = "06:00";
+  document.getElementById("ageLimit").value     = "0";
+  document.getElementById("allPeople").checked  = false;
+  document.getElementById("allGroups").checked  = false;
+  document.querySelectorAll(".pchk").forEach(c => c.checked = false);
+  GROUPS.forEach((_,gi) => { const el=document.getElementById("grp_"+gi); if(el) el.checked=false; });
+  PLANTS.forEach((plant,pi) => {
+    plant.lines.forEach((_,li)=>{ const el=document.getElementById("line_"+(li+1)); if(el) el.checked=true; });
+    const el=document.getElementById("pchk_plant_"+pi); if(el) el.checked=true;
+  });
+  updateAgeNote();
+  setStatus("Configuration cleared.");
+}
+
+/* ═══ INIT ═══ */
+buildPeople();
+buildGroups();
+buildLines();
+updateAgeNote();
+document.getElementById("ageLimit").addEventListener("input", updateAgeNote);
+document.getElementById("statusTime").textContent = nowStr();
+</script>
+</body>
+</html>
