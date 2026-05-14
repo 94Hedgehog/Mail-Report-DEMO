@@ -219,7 +219,7 @@ input[type="checkbox"] { width: 13px; height: 13px; cursor: pointer; margin: 0; 
           <span class="row-lbl">Email text</span>
           <textarea style="flex:1;" id="emailText" rows="3">Dear team,
 Please find the attached production report for review.
-Best regards, AMS+ System</textarea>
+Best regards. </textarea>
         </div>
 
         <!-- Recipients -->
@@ -348,7 +348,7 @@ Best regards, AMS+ System</textarea>
             </tr>
             <tr>
               <th>Line</th><th>Work Center</th><th>Prod. Order No.</th>
-              <th>SAP Status</th><th>AMS+ Status</th><th>Article No.</th><th>Description</th>
+              <th>SAP Status</th><th>MES Status</th><th>Article No.</th><th>Description</th>
               <th>Target</th><th>Started</th><th>Produced</th><th>Scrapped</th>
               <th>Date</th><th>Time</th><th>Date</th><th>Time</th>
               <th>On Hold</th><th>Comment</th><th>Destination</th>
@@ -383,23 +383,23 @@ const PLANTS = [
 ];
 
 const DATA = [
-  {li:1,wc:"WCA",po:"1001",sap:"Partially Confirmed",ams:"RUNNING",art:"1111",desc:"Product A - Type 1",  t:2880,s:2801,p:2044,sc:127,sd:"04-02-2026",st:"15:30",ed:"11-03-2026",et:"23:39",hold:"no", com:"",               dest:"City A"},
-  {li:1,wc:"WCA",po:"1002",sap:"Open",               ams:"RUNNING",art:"1112",desc:"Product A - Type 2",  t:1500,s:1200,p:980, sc:45, sd:"05-02-2026",st:"08:00",ed:"15-03-2026",et:"16:00",hold:"no", com:"",               dest:"City B"},
-  {li:1,wc:"WCA",po:"1003",sap:"Partially Confirmed",ams:"RUNNING",art:"1113",desc:"Component A - Var 1", t:3200,s:3100,p:2750,sc:200,sd:"01-02-2026",st:"07:00",ed:"10-03-2026",et:"18:00",hold:"yes",com:"Material delayed",dest:"City C"},
-  {li:1,wc:"WCA",po:"1004",sap:"Open",               ams:"RUNNING",art:"1114",desc:"Assembly A - Set 1",  t:760, s:600, p:480, sc:18, sd:"08-02-2026",st:"10:00",ed:"17-03-2026",et:"14:00",hold:"no", com:"",               dest:"City D"},
-  {li:2,wc:"WCB",po:"2001",sap:"Open",               ams:"RUNNING",art:"2111",desc:"Product B - Type 1",  t:640, s:580, p:510, sc:12, sd:"06-02-2026",st:"09:00",ed:"14-03-2026",et:"17:00",hold:"no", com:"",               dest:"City E"},
-  {li:2,wc:"WCB",po:"2002",sap:"Partially Confirmed",ams:"RUNNING",art:"2112",desc:"Product B - Type 2",  t:820, s:790, p:710, sc:30, sd:"07-02-2026",st:"10:00",ed:"16-03-2026",et:"12:00",hold:"no", com:"",               dest:"City F"},
-  {li:2,wc:"WCB",po:"2003",sap:"Open",               ams:"RUNNING",art:"2113",desc:"Component B - Var 1", t:1100,s:950, p:820, sc:22, sd:"09-02-2026",st:"07:30",ed:"18-03-2026",et:"15:00",hold:"no", com:"",               dest:"City G"},
-  {li:3,wc:"WCC",po:"3001",sap:"Open",               ams:"RUNNING",art:"3111",desc:"Product C - Type 1",  t:1100,s:950, p:820, sc:15, sd:"03-02-2026",st:"06:30",ed:"09-03-2026",et:"14:30",hold:"no", com:"",               dest:"City H"},
-  {li:3,wc:"WCC",po:"3002",sap:"Partially Confirmed",ams:"RUNNING",art:"3112",desc:"Product C - Type 2",  t:2400,s:2200,p:1900,sc:88, sd:"08-02-2026",st:"11:00",ed:"17-03-2026",et:"20:00",hold:"no", com:"",               dest:"City I"},
-  {li:3,wc:"WCC",po:"3003",sap:"Open",               ams:"RUNNING",art:"3113",desc:"Component C - Var 1", t:560, s:500, p:450, sc:22, sd:"09-02-2026",st:"08:00",ed:"18-03-2026",et:"16:00",hold:"yes",com:"Quality check",   dest:"City J"},
-  {li:3,wc:"WCC",po:"3004",sap:"Partially Confirmed",ams:"RUNNING",art:"3114",desc:"Assembly C - Set 1",  t:980, s:900, p:750, sc:40, sd:"10-02-2026",st:"09:00",ed:"19-03-2026",et:"15:00",hold:"no", com:"",               dest:"City K"},
-  {li:4,wc:"WCD",po:"4001",sap:"Open",               ams:"RUNNING",art:"4111",desc:"Product D - Type 1",  t:3600,s:3400,p:3100,sc:55, sd:"02-02-2026",st:"07:30",ed:"08-03-2026",et:"13:30",hold:"no", com:"",               dest:"City L"},
-  {li:4,wc:"WCD",po:"4002",sap:"Partially Confirmed",ams:"RUNNING",art:"4112",desc:"Product D - Type 2",  t:1800,s:1600,p:1400,sc:70, sd:"11-02-2026",st:"10:30",ed:"20-03-2026",et:"17:30",hold:"no", com:"",               dest:"City M"},
-  {li:4,wc:"WCD",po:"4003",sap:"Open",               ams:"RUNNING",art:"4113",desc:"Component D - Var 1", t:2200,s:2000,p:1750,sc:90, sd:"12-02-2026",st:"08:00",ed:"21-03-2026",et:"16:00",hold:"yes",com:"On hold review",  dest:"City N"},
-  {li:5,wc:"WCE",po:"5001",sap:"Open",               ams:"RUNNING",art:"5111",desc:"Product E - Type 1",  t:4200,s:4000,p:3700,sc:120,sd:"12-02-2026",st:"08:00",ed:"21-03-2026",et:"16:00",hold:"no", com:"",               dest:"City O"},
-  {li:5,wc:"WCE",po:"5002",sap:"Partially Confirmed",ams:"RUNNING",art:"5112",desc:"Product E - Type 2",  t:900, s:850, p:780, sc:35, sd:"13-02-2026",st:"09:00",ed:"22-03-2026",et:"14:00",hold:"yes",com:"Pending approval", dest:"City P"},
-  {li:5,wc:"WCE",po:"5003",sap:"Open",               ams:"RUNNING",art:"5113",desc:"Component E - Var 1", t:650, s:580, p:500, sc:28, sd:"14-02-2026",st:"07:00",ed:"23-03-2026",et:"13:00",hold:"no", com:"",               dest:"City Q"},
+  {li:1,wc:"WCA",po:"1001",sap:"Partially Confirmed",mes:"RUNNING",art:"1111",desc:"Product A - Type 1",  t:2880,s:2801,p:2044,sc:127,sd:"04-02-2026",st:"15:30",ed:"11-03-2026",et:"23:39",hold:"no", com:"",               dest:"City A"},
+  {li:1,wc:"WCA",po:"1002",sap:"Open",               mes:"RUNNING",art:"1112",desc:"Product A - Type 2",  t:1500,s:1200,p:980, sc:45, sd:"05-02-2026",st:"08:00",ed:"15-03-2026",et:"16:00",hold:"no", com:"",               dest:"City B"},
+  {li:1,wc:"WCA",po:"1003",sap:"Partially Confirmed",mes:"RUNNING",art:"1113",desc:"Component A - Var 1", t:3200,s:3100,p:2750,sc:200,sd:"01-02-2026",st:"07:00",ed:"10-03-2026",et:"18:00",hold:"yes",com:"Material delayed",dest:"City C"},
+  {li:1,wc:"WCA",po:"1004",sap:"Open",               mes:"RUNNING",art:"1114",desc:"Assembly A - Set 1",  t:760, s:600, p:480, sc:18, sd:"08-02-2026",st:"10:00",ed:"17-03-2026",et:"14:00",hold:"no", com:"",               dest:"City D"},
+  {li:2,wc:"WCB",po:"2001",sap:"Open",               mes:"RUNNING",art:"2111",desc:"Product B - Type 1",  t:640, s:580, p:510, sc:12, sd:"06-02-2026",st:"09:00",ed:"14-03-2026",et:"17:00",hold:"no", com:"",               dest:"City E"},
+  {li:2,wc:"WCB",po:"2002",sap:"Partially Confirmed",mes:"RUNNING",art:"2112",desc:"Product B - Type 2",  t:820, s:790, p:710, sc:30, sd:"07-02-2026",st:"10:00",ed:"16-03-2026",et:"12:00",hold:"no", com:"",               dest:"City F"},
+  {li:2,wc:"WCB",po:"2003",sap:"Open",               mes:"RUNNING",art:"2113",desc:"Component B - Var 1", t:1100,s:950, p:820, sc:22, sd:"09-02-2026",st:"07:30",ed:"18-03-2026",et:"15:00",hold:"no", com:"",               dest:"City G"},
+  {li:3,wc:"WCC",po:"3001",sap:"Open",               mes:"RUNNING",art:"3111",desc:"Product C - Type 1",  t:1100,s:950, p:820, sc:15, sd:"03-02-2026",st:"06:30",ed:"09-03-2026",et:"14:30",hold:"no", com:"",               dest:"City H"},
+  {li:3,wc:"WCC",po:"3002",sap:"Partially Confirmed",mes:"RUNNING",art:"3112",desc:"Product C - Type 2",  t:2400,s:2200,p:1900,sc:88, sd:"08-02-2026",st:"11:00",ed:"17-03-2026",et:"20:00",hold:"no", com:"",               dest:"City I"},
+  {li:3,wc:"WCC",po:"3003",sap:"Open",               mes:"RUNNING",art:"3113",desc:"Component C - Var 1", t:560, s:500, p:450, sc:22, sd:"09-02-2026",st:"08:00",ed:"18-03-2026",et:"16:00",hold:"yes",com:"Quality check",   dest:"City J"},
+  {li:3,wc:"WCC",po:"3004",sap:"Partially Confirmed",mes:"RUNNING",art:"3114",desc:"Assembly C - Set 1",  t:980, s:900, p:750, sc:40, sd:"10-02-2026",st:"09:00",ed:"19-03-2026",et:"15:00",hold:"no", com:"",               dest:"City K"},
+  {li:4,wc:"WCD",po:"4001",sap:"Open",               mes:"RUNNING",art:"4111",desc:"Product D - Type 1",  t:3600,s:3400,p:3100,sc:55, sd:"02-02-2026",st:"07:30",ed:"08-03-2026",et:"13:30",hold:"no", com:"",               dest:"City L"},
+  {li:4,wc:"WCD",po:"4002",sap:"Partially Confirmed",mes:"RUNNING",art:"4112",desc:"Product D - Type 2",  t:1800,s:1600,p:1400,sc:70, sd:"11-02-2026",st:"10:30",ed:"20-03-2026",et:"17:30",hold:"no", com:"",               dest:"City M"},
+  {li:4,wc:"WCD",po:"4003",sap:"Open",               mes:"RUNNING",art:"4113",desc:"Component D - Var 1", t:2200,s:2000,p:1750,sc:90, sd:"12-02-2026",st:"08:00",ed:"21-03-2026",et:"16:00",hold:"yes",com:"On hold review",  dest:"City N"},
+  {li:5,wc:"WCE",po:"5001",sap:"Open",               mes:"RUNNING",art:"5111",desc:"Product E - Type 1",  t:4200,s:4000,p:3700,sc:120,sd:"12-02-2026",st:"08:00",ed:"21-03-2026",et:"16:00",hold:"no", com:"",               dest:"City O"},
+  {li:5,wc:"WCE",po:"5002",sap:"Partially Confirmed",mes:"RUNNING",art:"5112",desc:"Product E - Type 2",  t:900, s:850, p:780, sc:35, sd:"13-02-2026",st:"09:00",ed:"22-03-2026",et:"14:00",hold:"yes",com:"Pending approval", dest:"City P"},
+  {li:5,wc:"WCE",po:"5003",sap:"Open",               mes:"RUNNING",art:"5113",desc:"Component E - Var 1", t:650, s:580, p:500, sc:28, sd:"14-02-2026",st:"07:00",ed:"23-03-2026",et:"13:00",hold:"no", com:"",               dest:"City Q"},
 ];
 
 let savedList = [];
@@ -542,7 +542,7 @@ function generateReport() {
     .sort((a,b) => new Date(a.sd.split("-").reverse().join("-")+"T"+a.st) - new Date(b.sd.split("-").reverse().join("-")+"T"+b.st));
 
   document.getElementById("rptTo").textContent      = recipStr;
-  document.getElementById("rptSubject").textContent = "[AMS+] Not Complete Yesterday Plan - "+name+" - "+nowStr();
+  document.getElementById("rptSubject").textContent = "[MES] Not Complete Yesterday Plan - "+name+" - "+nowStr();
   document.getElementById("rptLines").textContent   = lineStr;
   document.getElementById("rptCount").textContent   = rows.length + " record(s)";
   document.getElementById("rptBody").textContent    = emailTxt;
@@ -552,7 +552,7 @@ function generateReport() {
   rows.forEach(r => {
     const tr = document.createElement("tr");
     tr.innerHTML = `<td>L${r.li}</td><td>${r.wc}</td><td>${r.po}</td>
-      <td>${r.sap}</td><td>${r.ams}</td><td>${r.art}</td>
+      <td>${r.sap}</td><td>${r.mes}</td><td>${r.art}</td>
       <td style="white-space:normal;min-width:150px;">${r.desc}</td>
       <td style="text-align:right;">${r.t.toLocaleString()}</td>
       <td style="text-align:right;">${r.s.toLocaleString()}</td>
